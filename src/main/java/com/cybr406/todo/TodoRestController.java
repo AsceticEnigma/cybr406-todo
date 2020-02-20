@@ -1,17 +1,14 @@
 package com.cybr406.todo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import sun.net.www.content.text.Generic;
 
-import javax.swing.text.html.Option;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -21,6 +18,9 @@ public class TodoRestController {
     @Autowired
     InMemoryTodoRepository repository;
 
+    @Autowired
+    TodoJpaRepository jpaTodoRes;
+
     /*@InitBinder("t")
     public void initTodoBinder(WebDataBinder binder) {
         binder.setValidator(new TodoValidator());
@@ -28,7 +28,7 @@ public class TodoRestController {
 
     @PostMapping("/todos")
     public ResponseEntity<Todo> create(@Valid @RequestBody Todo td) {
-        Todo created = repository.create(td);
+        Todo created = jpaTodoRes.save(td);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
@@ -46,9 +46,8 @@ public class TodoRestController {
     }
 
     @GetMapping("/todos")
-    public ResponseEntity<List<Todo>> returnList(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-        List<Todo> listTodos = repository.findAll(page, size);
-        return new ResponseEntity<>(listTodos, HttpStatus.OK);
+    public Page<Todo> findAll(Pageable pageable) {
+        return jpaTodoRes.findAll(pageable);
     }
 
     @PostMapping("/todos/{id}/tasks")
